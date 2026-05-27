@@ -12,7 +12,7 @@ export interface ServerToClientEvents {
   'message:received': (message: Message) => void;
   'room:user_joined': (user: User) => void;
   'room:user_left': (user: User) => void;
-  'presence: update': (users: User[]) => void;
+  'presence:update': (users: User[]) => void;
   'typing:update': (payload: {
     userId: string;
     username: string;

@@ -9,6 +9,7 @@ export interface Room {
   name: string;
   inviteCode: string;
   ownerId: string;
+  createdAt: string;
 }
 
 export interface Message {
