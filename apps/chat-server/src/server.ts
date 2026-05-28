@@ -12,7 +12,7 @@ const { authRouter } = require('./routes/auth');
 const { roomsRouter } = require('./routes/rooms');
 
 const app = express();
-app.use(express.json);
+app.use(express.json());
 app.use(cors());
 app.use('/auth', authRouter);
 app.user('/rooms', roomsRouter);
