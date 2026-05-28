@@ -50,4 +50,27 @@ async function createMessage(
   return result.rows[0];
 }
 
-export { createUser, findUserByEmail, createRoom, createMessage };
+async function findRoomByInviteCode(inviteCode: string): Promise<Room> {
+  const text = 'SELECT * FROM rooms WHERE invite_code = $1';
+  const values = [inviteCode];
+
+  const result = await pool.query(text, values);
+  return result.rows[0];
+}
+
+async function getMessagesByRoomId(roomId: string): Promise<Message[]> {
+  const text = 'SELECT * FROM messages where room_id = $1';
+  const values = [roomId];
+
+  const result = await pool.query(text, values);
+  return result.rows;
+}
+
+export {
+  createUser,
+  findUserByEmail,
+  createRoom,
+  createMessage,
+  findRoomByInviteCode,
+  getMessagesByRoomId,
+};

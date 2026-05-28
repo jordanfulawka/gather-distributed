@@ -11,7 +11,7 @@ function authMiddleware(socket: Socket, next: (err?: Error) => void) {
   if (!secret) throw new Error('JWT_SECRET not set');
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, secret);
     socket.data.user = decoded;
   } catch (err) {
     return next(new Error('Invalid token'));
