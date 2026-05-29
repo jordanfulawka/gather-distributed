@@ -1,6 +1,4 @@
 import { Message, Room } from '@gather/shared-types';
-import { join } from 'path';
-
 async function login(
   email: string,
   password: string,
@@ -103,4 +101,4 @@ async function joinRoom(
   return response.json();
 }
 
-module.exports = { login, register, createRoom, getMessages, joinRoom };
+export { login, register, createRoom, getMessages, joinRoom };

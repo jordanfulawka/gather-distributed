@@ -6,7 +6,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
 } from '@gather/socket-events';
-const { authMiddleware } = require('./middleware');
+const { authMiddleware } = require('./middleware/auth');
 const { registerHandlers } = require('./handlers');
 const { authRouter } = require('./routes/auth');
 const { roomsRouter } = require('./routes/rooms');
