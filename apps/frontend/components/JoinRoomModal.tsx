@@ -55,6 +55,7 @@ export default function JoinRoomModal({
             </button>
           </form>
         </div>
+        {error && <p className='text-red-600'>{error}</p>}
       </div>
     </div>
   );

@@ -80,7 +80,7 @@ export default function CreateRoomModal({
               </button>
             )}
           </form>
-          {error && <p>{error}</p>}
+          {error && <p className='text-red-600'>{error}</p>}
         </div>
       </div>
     </div>
