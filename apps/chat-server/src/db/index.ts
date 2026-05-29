@@ -66,6 +66,22 @@ async function getMessagesByRoomId(roomId: string): Promise<Message[]> {
   return result.rows;
 }
 
+async function addRoomMember(roomId: string, userId: string): Promise<void> {
+  const text = 'INSERT INTO room_members(room_id, user_id) VALUES($1, $2)';
+  const values = [roomId, userId];
+
+  await pool.query(text, values);
+}
+
+async function getRoomsByUserId(userId: string): Promise<Room[]> {
+  const text =
+    'SELECT rooms.* FROM rooms JOIN room_members on rooms.id = room_members.room_id WHERE user_id = $1';
+  const values = [userId];
+
+  const result = await pool.query(text, values);
+  return result.rows;
+}
+
 export {
   createUser,
   findUserByEmail,
@@ -73,4 +89,6 @@ export {
   createMessage,
   findRoomByInviteCode,
   getMessagesByRoomId,
+  addRoomMember,
+  getRoomsByUserId,
 };

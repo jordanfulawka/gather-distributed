@@ -101,4 +101,18 @@ async function joinRoom(
   return response.json();
 }
 
-export { login, register, createRoom, getMessages, joinRoom };
+async function getRooms(token: string): Promise<{ rooms: Room[] }> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error);
+  }
+  return response.json();
+}
+
+export { login, register, createRoom, getMessages, joinRoom, getRooms };

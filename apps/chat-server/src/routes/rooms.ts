@@ -1,10 +1,25 @@
-import { createRoom, findRoomByInviteCode, getMessagesByRoomId } from '../db';
+import {
+  addRoomMember,
+  createRoom,
+  findRoomByInviteCode,
+  getMessagesByRoomId,
+  getRoomsByUserId,
+} from '../db';
 import type { Request, Response } from 'express';
 const { httpAuth } = require('../middleware/httpAuth');
 
 const express = require('express');
 
 const router = express.Router();
+
+router.route('/').get(httpAuth, async (req: Request, res: Response) => {
+  try {
+    const rooms = await getRoomsByUserId((req as any).user.id);
+    res.status(200).json({ rooms });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not fetch rooms' });
+  }
+});
 
 router.route('/').post(httpAuth, async (req: Request, res: Response) => {
   try {
@@ -42,6 +57,7 @@ router.route('/join').post(httpAuth, async (req: Request, res: Response) => {
     if (!room) {
       return res.status(404).json({ error: 'Room not found' });
     }
+    await addRoomMember(room.id, (req as any).user.id);
 
     res.status(200).json({ room });
   } catch (err) {
