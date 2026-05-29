@@ -3,6 +3,7 @@ import {
   createRoom,
   findRoomByInviteCode,
   getMessagesByRoomId,
+  getRoomById,
   getRoomsByUserId,
 } from '../db';
 import type { Request, Response } from 'express';
@@ -31,6 +32,18 @@ router.route('/').post(httpAuth, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Room could not be created' });
   }
 });
+
+router
+  .route('/:id')
+  .get(httpAuth, async (req: Request<{ id: string }>, res: Response) => {
+    try {
+      const room = await getRoomById(req.params.id);
+      if (!room) return res.status(404).json({ error: 'Room not found' });
+      res.status(200).json({ room });
+    } catch (err) {
+      res.status(500).json({ error: 'Could not fetch room' });
+    }
+  });
 
 router
   .route('/:id/messages')
@@ -65,3 +78,5 @@ router.route('/join').post(httpAuth, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Could not find room' });
   }
 });
+
+module.exports = { roomsRouter: router };

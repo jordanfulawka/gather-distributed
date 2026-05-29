@@ -35,7 +35,7 @@ router.route('/login').post(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await findUserByEmail(email);
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-    const passwordMatch = await bcryptjs.compare(password, user.password_hash);
+    const passwordMatch = await bcryptjs.compare(password, user.passwordHash);
 
     if (!process.env.JWT_SECRET)
       return res.status(500).json({ error: 'Server misconfiguration' });
@@ -55,4 +55,4 @@ router.route('/login').post(async (req: Request, res: Response) => {
   }
 });
 
-module.exports = { router };
+module.exports = { authRouter: router };

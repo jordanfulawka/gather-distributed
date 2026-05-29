@@ -7,7 +7,7 @@ import type {
   ServerToClientEvents,
 } from '@gather/socket-events';
 const { authMiddleware } = require('./middleware/auth');
-const { registerHandlers } = require('./handlers');
+const { registerHandlers } = require('./handlers/chat');
 const { authRouter } = require('./routes/auth');
 const { roomsRouter } = require('./routes/rooms');
 
@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use('/auth', authRouter);
-app.user('/rooms', roomsRouter);
+app.use('/rooms', roomsRouter);
 
 const httpServer = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
@@ -23,6 +23,6 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 });
 
 io.use(authMiddleware);
-registerHandlers();
+registerHandlers(io);
 
 module.exports = { app, httpServer, io };

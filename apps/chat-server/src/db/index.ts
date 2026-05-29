@@ -1,7 +1,9 @@
+require('dotenv').config({ override: true });
 import type { User, Message, Room } from '@gather/shared-types';
 import { Pool } from 'pg';
 import { randomBytes } from 'node:crypto';
 
+console.log('DATABASE URL:', process.env.DATABASE_URL);
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function createUser(
@@ -10,17 +12,17 @@ async function createUser(
   hashedPassword: string,
 ): Promise<User> {
   const text =
-    'INSERT INTO users(username, email, password_hash) VALUES($1, $2, $3) RETURNING *';
+    'INSERT INTO users(username, email, password_hash) VALUES($1, $2, $3) RETURNING id, username, email, password_hash AS "passwordHash", created_at AS "createdAt"';
   const values = [username, email, hashedPassword];
-
   const result = await pool.query(text, values);
   return result.rows[0];
 }
 
 async function findUserByEmail(
   email: string,
-): Promise<User & { password_hash: string }> {
-  const text = 'SELECT * FROM users WHERE email = $1';
+): Promise<User & { passwordHash: string }> {
+  const text =
+    'SELECT id, username, email, password_hash AS "passwordHash", created_at AS "createdAt" FROM users WHERE email = $1';
   const values = [email];
 
   const result = await pool.query(text, values);
@@ -30,7 +32,7 @@ async function findUserByEmail(
 async function createRoom(name: string, ownerId: string): Promise<Room> {
   const inviteCode = randomBytes(4).toString('hex');
   const text =
-    'INSERT INTO rooms(name, invite_code, owner_id) VALUES($1, $2, $3) RETURNING *';
+    'INSERT INTO rooms(name, invite_code, owner_id) VALUES($1, $2, $3) RETURNING id, name, invite_code AS "inviteCode", owner_id AS "ownerId", created_at AS "createdAt"';
   const values = [name, inviteCode, ownerId];
 
   const result = await pool.query(text, values);
@@ -43,7 +45,7 @@ async function createMessage(
   content: string,
 ): Promise<Message> {
   const text =
-    'INSERT INTO messages(room_id, user_id, content) VALUES($1, $2, $3) RETURNING *';
+    'INSERT INTO messages(room_id, user_id, content) VALUES($1, $2, $3) RETURNING id, room_id AS "roomId", user_id AS "userId", content, created_at AS "createdAt"';
   const values = [roomId, userId, content];
 
   const result = await pool.query(text, values);
@@ -51,7 +53,8 @@ async function createMessage(
 }
 
 async function findRoomByInviteCode(inviteCode: string): Promise<Room> {
-  const text = 'SELECT * FROM rooms WHERE invite_code = $1';
+  const text =
+    'SELECT id, name, invite_code AS "inviteCode", owner_id AS "ownerId", created_at AS "createdAt" FROM rooms WHERE invite_code = $1';
   const values = [inviteCode];
 
   const result = await pool.query(text, values);
@@ -59,7 +62,8 @@ async function findRoomByInviteCode(inviteCode: string): Promise<Room> {
 }
 
 async function getMessagesByRoomId(roomId: string): Promise<Message[]> {
-  const text = 'SELECT * FROM messages where room_id = $1';
+  const text =
+    'SELECT messages.id, messages.room_id AS "roomId", messages.user_id AS "userId", users.username, messages.content, messages.created_at AS "createdAt" FROM messages JOIN users ON messages.user_id = users.id WHERE room_id = $1';
   const values = [roomId];
 
   const result = await pool.query(text, values);
@@ -75,11 +79,20 @@ async function addRoomMember(roomId: string, userId: string): Promise<void> {
 
 async function getRoomsByUserId(userId: string): Promise<Room[]> {
   const text =
-    'SELECT rooms.* FROM rooms JOIN room_members on rooms.id = room_members.room_id WHERE user_id = $1';
+    'SELECT rooms.id, rooms.name, rooms.invite_code AS "inviteCode", rooms.owner_id AS "ownerId", rooms.created_at AS "createdAt" FROM rooms JOIN room_members on rooms.id = room_members.room_id WHERE user_id = $1';
   const values = [userId];
 
   const result = await pool.query(text, values);
   return result.rows;
+}
+
+async function getRoomById(roomId: string): Promise<Room> {
+  const text =
+    'SELECT id, name, invite_code AS "inviteCode", owner_id AS "ownerId", created_at AS "createdAt" FROM rooms WHERE id = $1';
+  const values = [roomId];
+
+  const result = await pool.query(text, values);
+  return result.rows[0];
 }
 
 export {
@@ -91,4 +104,5 @@ export {
   getMessagesByRoomId,
   addRoomMember,
   getRoomsByUserId,
+  getRoomById,
 };

@@ -26,6 +26,7 @@ export default function CreateRoomModal({
         return;
       }
       const response = await createRoom(roomName, token);
+      console.log(response);
       setRoom(response.newRoom);
       setInviteCode(response.newRoom.inviteCode);
     } catch {
@@ -50,6 +51,7 @@ export default function CreateRoomModal({
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               className='border border-black'
+              disabled={!!inviteCode}
             />
             {!inviteCode && (
               <div className='flex justify-around gap-5 mt-3'>
@@ -73,7 +75,12 @@ export default function CreateRoomModal({
             {inviteCode && (
               <button
                 className='bg-fuchsia-500 rounded-lg w-full'
-                onClick={() => room && onSuccess(room.id)}
+                onClick={() => {
+                  if (room) {
+                    onSuccess(room.id);
+                    onClose();
+                  }
+                }}
                 type='button'
               >
                 <p className='p-1'>Done</p>

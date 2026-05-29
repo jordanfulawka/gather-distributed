@@ -1,8 +1,7 @@
-const { io } = require('../server');
-import type { Socket } from 'socket.io';
+import type { Socket, Server } from 'socket.io';
 import { createMessage } from '../db';
 
-function registerHandlers() {
+function registerHandlers(io: Server) {
   io.on('connection', (socket: Socket) => {
     socket.on('room:join', (roomId) => {
       socket.join(roomId);
@@ -19,7 +18,10 @@ function registerHandlers() {
           socket.data.user.id,
           payload.content,
         );
-        io.to(payload.roomId).emit('message:received', message);
+        io.to(payload.roomId).emit('message:received', {
+          ...message,
+          username: socket.data.user.username,
+        });
       } catch (err) {
         socket.emit('error', 'failed to send message');
       }
@@ -38,7 +40,7 @@ function registerHandlers() {
         isTyping: false,
       });
     });
-    socket.on('disconnect', () => {
+    socket.on('disconnecting', () => {
       socket.rooms.forEach((roomId) => {
         socket.to(roomId).emit('room:user_left', socket.data.user);
       });

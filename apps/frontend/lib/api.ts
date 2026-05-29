@@ -33,6 +33,7 @@ async function register(
       body: JSON.stringify({ email, username, password }),
     },
   );
+  console.log('here');
   if (!response.ok) {
     const data = await response.json();
     throw new Error(data.error);
@@ -115,4 +116,23 @@ async function getRooms(token: string): Promise<{ rooms: Room[] }> {
   return response.json();
 }
 
-export { login, register, createRoom, getMessages, joinRoom, getRooms };
+async function getRoom(roomId: string, token: string) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!response.ok) throw new Error('Could not fetch room');
+  return response.json();
+}
+
+export {
+  login,
+  register,
+  createRoom,
+  getMessages,
+  joinRoom,
+  getRooms,
+  getRoom,
+};

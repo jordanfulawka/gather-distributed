@@ -22,11 +22,11 @@ CREATE TABLE messages (
   user_id UUID REFERENCES users(id),
   content text NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
-)
+);
 
 CREATE TABLE room_members (
   room_id UUID REFERENCES rooms(id),
   user_id UUID REFERENCES users(id),
   joined_at TIMESTAMP DEFAULT NOW(),
   PRIMARY KEY (room_id, user_id)
-)
+);
