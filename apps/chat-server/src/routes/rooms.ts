@@ -25,6 +25,7 @@ router.route('/').post(httpAuth, async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     const newRoom = await createRoom(name, (req as any).user.id);
+    await addRoomMember(newRoom.id, (req as any).user.id);
     res.status(201).json({ newRoom });
   } catch (err) {
     res.status(500).json({ error: 'Room could not be created' });

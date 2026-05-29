@@ -53,7 +53,7 @@ export default function Home() {
 
   return (
     <div className='bg-black/80 fixed inset-0 flex justify-center items-center z-50'>
-      <div className='bg-white w-96 rounded-2xl box'>
+      <div className='bg-white w-96 rounded-2xl'>
         <div className='p-4'>
           <form onSubmit={handleSubmit} className='flex flex-col'>
             <label>Email</label>
