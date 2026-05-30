@@ -12,6 +12,7 @@ export default function RoomPage() {
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [text, setText] = useState('');
+  const [onlineUsers, setOnlineUsers] = useState<Record<string, string>>({});
   const ref = useRef<HTMLDivElement>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const { token } = useAuth();
@@ -60,9 +61,13 @@ export default function RoomPage() {
     socket.on('message:received', (message) => {
       setMessages((prev) => (prev ? [...prev, message] : [message]));
     });
+    socket.on('presence:update', (presence: Record<string, string>) => {
+      setOnlineUsers(presence);
+    });
     fetchMessagesAndRoomData();
 
     return () => {
+      socket.emit('room:leave', roomId);
       socket.off('connect');
       socket.off('message:received');
       socket.disconnect();
@@ -73,7 +78,19 @@ export default function RoomPage() {
   return (
     <div className='bg-black/80 flex flex-col h-full'>
       <div className='flex items-center justify-between px-6 py-3 border-b border-white/10 bg-black/60'>
-        <h2 className='text-white font-semibold text-lg'># {room?.name}</h2>
+        <div className='relative group'>
+          <h2 className='text-white font-semibold text-lg cursor-default'>
+            # {room?.name}
+          </h2>
+          <div className='absolute top-full left-0 mg-1 bg-black/90 border border-white/10 rounded p-2 hidden group-hover:block z-10 min-w-32'>
+            <p className='text-gray-400 text-xs mb-1'>Online</p>
+            {Object.keys(onlineUsers).map((username) => (
+              <p key={username} className='text-white text-sm'>
+                {username}
+              </p>
+            ))}
+          </div>
+        </div>
         <div className='flex items-center gap-2 text-gray-400 text-sm'>
           <span>invite code:</span>
           <span className='bg-white/10 px-2 py-1 rounded font-mono text-white'>

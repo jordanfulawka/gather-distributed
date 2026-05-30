@@ -8,7 +8,7 @@ function registerHandlers(io: Server, redis: Redis) {
       socket.join(roomId);
       await redis.hset(
         `presence:${roomId}`,
-        socket.data.user.id,
+        socket.data.user.username,
         process.env.SERVER_ID as string,
       );
       io.to(roomId).emit('room:user_joined', socket.data.user);
@@ -17,7 +17,7 @@ function registerHandlers(io: Server, redis: Redis) {
     });
     socket.on('room:leave', async (roomId) => {
       socket.leave(roomId);
-      await redis.hdel(`presence:${roomId}`, socket.data.user.id);
+      await redis.hdel(`presence:${roomId}`, socket.data.user.username);
       io.to(roomId).emit('room:user_left', socket.data.user);
       const presence = await redis.hgetall(`presence:${roomId}`);
       io.to(roomId).emit('presence:update', presence);
@@ -54,14 +54,14 @@ function registerHandlers(io: Server, redis: Redis) {
     socket.on('disconnecting', async () => {
       for (const roomId of socket.rooms) {
         socket.to(roomId).emit('room:user_left', socket.data.user.id);
-        await redis.hdel(`presence:${roomId}`, socket.data.user.id);
+        await redis.hdel(`presence:${roomId}`, socket.data.user.username);
         const presence = await redis.hgetall(`presence:${roomId}`);
         io.to(roomId).emit('presence:update', presence);
       }
     });
-    socket.on('presense:ping', async (roomId) => {
+    socket.on('presence:ping', async (roomId) => {
       await redis.hset(
-        `presense:${roomId}`,
+        `presence:${roomId}`,
         socket.data.user.id,
         process.env.SERVER_ID as string,
       );
