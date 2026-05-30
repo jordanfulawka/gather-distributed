@@ -1,9 +1,8 @@
-require('dotenv').config({ override: true });
+require('dotenv').config();
 import type { User, Message, Room } from '@gather/shared-types';
 import { Pool } from 'pg';
 import { randomBytes } from 'node:crypto';
 
-console.log('DATABASE URL:', process.env.DATABASE_URL);
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function createUser(

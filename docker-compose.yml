@@ -11,7 +11,7 @@ services:
       - ./infrastructure/database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
 
-  chat-server:
+  server-a:
     build:
       context: .
       dockerfile: apps/chat-server/Dockerfile
@@ -19,18 +19,61 @@ services:
       - '3001:3001'
     environment:
       DATABASE_URL: postgres://gather:gather@postgres:5432/gather
+      REDIS_URL: redis://:gather@redis:6379
       JWT_SECRET: dev-secret-change-me
       PORT: 3001
+      SERVER_ID: 'server-a'
     depends_on:
       - postgres
+      - redis
 
-  frontend:
+  server-b:
+    build:
+      context: .
+      dockerfile: apps/chat-server/Dockerfile
+    ports:
+      - '3002:3001'
+    environment:
+      DATABASE_URL: postgres://gather:gather@postgres:5432/gather
+      REDIS_URL: redis://:gather@redis:6379
+      JWT_SECRET: dev-secret-change-me
+      PORT: 3001
+      SERVER_ID: 'server-b'
+    depends_on:
+      - postgres
+      - redis
+
+  frontend-a:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
     ports:
       - '3000:3000'
     depends_on:
-      - chat-server
+      - server-a
+
+  frontend-b:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3002
+    ports:
+      - '3003:3000'
+    depends_on:
+      - server-b
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    command: redis-server --requirepass gather --appendonly yes
+    volumes:
+      - redis-data:/data
+
 volumes:
   postgres_data:
+  redis-data:
+    driver: local
