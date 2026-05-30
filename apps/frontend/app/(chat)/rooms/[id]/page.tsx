@@ -13,6 +13,7 @@ export default function RoomPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [text, setText] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const { token } = useAuth();
   const { id } = useParams();
   const roomId = id as string;
@@ -52,6 +53,9 @@ export default function RoomPage() {
     socket.connect();
     socket.on('connect', () => {
       socket.emit('room:join', roomId);
+      heartbeatRef.current = setInterval(() => {
+        socket.emit('presence:ping', roomId);
+      }, 20000);
     });
     socket.on('message:received', (message) => {
       setMessages((prev) => (prev ? [...prev, message] : [message]));
@@ -62,6 +66,7 @@ export default function RoomPage() {
       socket.off('connect');
       socket.off('message:received');
       socket.disconnect();
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
     };
   }, [token]);
 

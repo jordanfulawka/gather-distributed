@@ -25,12 +25,11 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: { origin: '*' },
 });
 
-console.log('REDIS_URL:', process.env.REDIS_URL);
 const pubClient = new Redis(process.env.REDIS_URL);
 const subClient = pubClient.duplicate();
 io.adapter(createAdapter(pubClient, subClient));
 
 io.use(authMiddleware);
-registerHandlers(io);
+registerHandlers(io, pubClient);
 
 module.exports = { app, httpServer, io };
