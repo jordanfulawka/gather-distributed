@@ -24,6 +24,11 @@ function registerHandlers(io: Server, redis: Redis) {
     });
     socket.on('messages:send', async (payload) => {
       try {
+        const uuid = payload.eventId;
+        if (await redis.get(`event:${uuid}`)) {
+          return;
+        }
+        await redis.set(`event:${uuid}`, '1', 'EX', 30);
         const message = await createMessage(
           payload.roomId,
           socket.data.user.id,

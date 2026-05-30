@@ -3,7 +3,11 @@ import { Message, User } from '@gather/shared-types';
 export interface ClientToServerEvents {
   'room:join': (roomId: string) => void;
   'room:leave': (roomId: string) => void;
-  'messages:send': (payload: { roomId: string; content: string }) => void;
+  'messages:send': (payload: {
+    roomId: string;
+    content: string;
+    eventId: string;
+  }) => void;
   'typing:start': (roomId: string) => void;
   'typing:stop': (roomId: string) => void;
 }
