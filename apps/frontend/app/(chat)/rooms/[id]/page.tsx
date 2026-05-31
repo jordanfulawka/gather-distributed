@@ -13,11 +13,14 @@ export default function RoomPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [text, setText] = useState('');
   const [onlineUsers, setOnlineUsers] = useState<Record<string, string>>({});
+  const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
+  const [isTyping, setIsTyping] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const hasConnectedRef = useRef(false);
   const messageRef = useRef<Message[] | null>(null);
+  const isMountedRef = useRef(false);
 
   const { token } = useAuth();
   const { id } = useParams();
@@ -47,6 +50,7 @@ export default function RoomPage() {
       eventId: uuid,
     });
     setText('');
+    setIsTyping(false);
   }
 
   useEffect(() => {
@@ -76,16 +80,39 @@ export default function RoomPage() {
     socket.on('presence:update', (presence: Record<string, string>) => {
       setOnlineUsers(presence);
     });
+    socket.on('typing:update', (user) => {
+      setTypingUsers((prev) => ({ ...prev, [user.username]: user.isTyping }));
+    });
+
     fetchMessagesAndRoomData();
 
     return () => {
       socket.emit('room:leave', roomId);
       socket.off('connect');
       socket.off('message:received');
+      socket.off('presence:update');
+      socket.off('typing:update');
       socket.disconnect();
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
     };
   }, [token]);
+
+  useEffect(() => {
+    const timerId = setTimeout(() => setIsTyping(false), 5000);
+    return () => clearTimeout(timerId);
+  }, [text]);
+
+  useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return;
+    }
+    if (isTyping) {
+      socket.emit('typing:start', roomId);
+    } else {
+      socket.emit('typing:stop', roomId);
+    }
+  }, [isTyping]);
 
   return (
     <div className='bg-black/80 flex flex-col h-full'>
@@ -122,11 +149,21 @@ export default function RoomPage() {
         <div ref={ref} />
       </div>
       <div className='shrink-0'>
+        <div className='px-4 py-1 h-5 text-gray-400 text-xs italic'>
+          {Object.entries(typingUsers)
+            .filter(([, isTyping]) => isTyping)
+            .map(([username]) => username)
+            .join(', ')}
+          {Object.values(typingUsers).some(Boolean) && ' is typing...'}
+        </div>
         <form onSubmit={handleSubmit}>
           <input
             type='text'
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setIsTyping(true);
+              setText(e.target.value);
+            }}
             className='border border-black'
           />
         </form>
