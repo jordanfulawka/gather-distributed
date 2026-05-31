@@ -1,6 +1,7 @@
 import type { Socket, Server } from 'socket.io';
-import { createMessage } from '../db';
+import { createMessage, getMessagesAfter, getMessagesByRoomId } from '../db';
 import type { Redis } from 'ioredis';
+import { Message } from '@gather/shared-types';
 
 function registerHandlers(io: Server, redis: Redis) {
   io.on('connection', (socket: Socket) => {
@@ -21,6 +22,22 @@ function registerHandlers(io: Server, redis: Redis) {
       io.to(roomId).emit('room:user_left', socket.data.user);
       const presence = await redis.hgetall(`presence:${roomId}`);
       io.to(roomId).emit('presence:update', presence);
+    });
+    socket.on('room:rejoin', async ({ roomId, lastMessageId }) => {
+      socket.join(roomId);
+      await redis.hset(
+        `presence:${roomId}`,
+        socket.data.user.username,
+        process.env.SERVER_ID as string,
+      );
+      const presence = await redis.hgetall(`presence:${roomId}`);
+      socket.emit('presence:update', presence);
+      const messages = lastMessageId
+        ? await getMessagesAfter(roomId, lastMessageId)
+        : await getMessagesByRoomId(roomId);
+      messages.forEach((message: Message) => {
+        socket.emit('message:received', message);
+      });
     });
     socket.on('messages:send', async (payload) => {
       try {

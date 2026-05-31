@@ -13,8 +13,12 @@ export default function RoomPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [text, setText] = useState('');
   const [onlineUsers, setOnlineUsers] = useState<Record<string, string>>({});
+
   const ref = useRef<HTMLDivElement>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
+  const hasConnectedRef = useRef(false);
+  const messageRef = useRef<Message[] | null>(null);
+
   const { token } = useAuth();
   const { id } = useParams();
   const roomId = id as string;
@@ -27,7 +31,6 @@ export default function RoomPage() {
       }
       const messages = await getMessages(roomId, token);
       const roomData = await getRoom(roomId, token);
-      console.log(roomData);
       setMessages(messages.messages);
       setRoom(roomData.room);
     } catch {
@@ -48,6 +51,7 @@ export default function RoomPage() {
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: 'smooth' });
+    messageRef.current = messages;
   }, [messages]);
 
   useEffect(() => {
@@ -55,10 +59,16 @@ export default function RoomPage() {
     socket.auth = { token };
     socket.connect();
     socket.on('connect', () => {
-      socket.emit('room:join', roomId);
-      heartbeatRef.current = setInterval(() => {
-        socket.emit('presence:ping', roomId);
-      }, 20000);
+      if (hasConnectedRef.current) {
+        const lastMessageId = messageRef.current?.at(-1)?.id ?? null;
+        socket.emit('room:rejoin', { roomId, lastMessageId });
+      } else {
+        hasConnectedRef.current = true;
+        socket.emit('room:join', roomId);
+        heartbeatRef.current = setInterval(() => {
+          socket.emit('presence:ping', roomId);
+        }, 20000);
+      }
     });
     socket.on('message:received', (message) => {
       setMessages((prev) => (prev ? [...prev, message] : [message]));

@@ -94,6 +94,18 @@ async function getRoomById(roomId: string): Promise<Room> {
   return result.rows[0];
 }
 
+async function getMessagesAfter(roomId: string, lastMessageId: string) {
+  const text = `
+  SELECT messages.id, messages.room_id as "roomId", messages.user_id as "userId", users.username, messages.content, messages.created_at AS "createdAt" 
+  FROM messages 
+  JOIN users ON messages.user_id = users.id
+  WHERE messages.room_id = $1 AND messages.created_at > (SELECT created_at FROM messages WHERE id = $2) ORDER BY messages.created_at ASC`;
+  const values = [roomId, lastMessageId];
+
+  const result = await pool.query(text, values);
+  return result.rows;
+}
+
 export {
   createUser,
   findUserByEmail,
@@ -104,4 +116,5 @@ export {
   addRoomMember,
   getRoomsByUserId,
   getRoomById,
+  getMessagesAfter,
 };

@@ -3,6 +3,10 @@ import { Message, User } from '@gather/shared-types';
 export interface ClientToServerEvents {
   'room:join': (roomId: string) => void;
   'room:leave': (roomId: string) => void;
+  'room:rejoin': (payload: {
+    roomId: string;
+    lastMessageId: string | null;
+  }) => void;
   'messages:send': (payload: {
     roomId: string;
     content: string;
@@ -16,7 +20,7 @@ export interface ServerToClientEvents {
   'message:received': (message: Message) => void;
   'room:user_joined': (user: User) => void;
   'room:user_left': (user: User) => void;
-  'presence:update': (users: User[]) => void;
+  'presence:update': (users: Record<string, string>) => void;
   'typing:update': (payload: {
     userId: string;
     username: string;
