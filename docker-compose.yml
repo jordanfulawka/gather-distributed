@@ -53,6 +53,16 @@ services:
       - '3000:3000'
     depends_on:
       - nginx
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/frontend
+          target: /app/apps/frontend
+          initial_sync: true
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./apps/frontend/package.json
 
   redis:
     image: redis:7-alpine

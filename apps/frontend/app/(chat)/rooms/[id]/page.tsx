@@ -137,26 +137,28 @@ export default function RoomPage() {
           </span>
         </div>
       </div>
-      <div className='flex flex-col flex-1 overflow-y-auto'>
+      <div className='flex flex-col flex-1 overflow-y-auto px-4 py-2 gap-1'>
         {messages?.map((message) => {
           return (
-            <div key={message.id}>
-              <span>{message.username}: </span>
-              <span>{message.content}</span>
+            <div key={message.id} className='font-mono text-sm leading-relaxed'>
+              <span className='text-green-400'>{message.username}</span>
+              <span className='text-gray-500'>: </span>
+              <span className='text-gray-200'>{message.content}</span>
             </div>
           );
         })}
         <div ref={ref} />
       </div>
-      <div className='shrink-0'>
-        <div className='px-4 py-1 h-5 text-gray-400 text-xs italic'>
+      <div className='shrink-0 border-t border-white/10 bg-black/60'>
+        <div className='px-4 py-1 h-5 text-gray-500 text-xs italic'>
           {Object.entries(typingUsers)
             .filter(([, isTyping]) => isTyping)
             .map(([username]) => username)
             .join(', ')}
           {Object.values(typingUsers).some(Boolean) && ' is typing...'}
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='flex items-center gap-2 px-4 py-3'>
+          <span className='text-green-400 font-mono text-sm select-none'>{'>'}</span>
           <input
             type='text'
             value={text}
@@ -164,7 +166,8 @@ export default function RoomPage() {
               setIsTyping(true);
               setText(e.target.value);
             }}
-            className='border border-black'
+            placeholder='type a message...'
+            className='flex-1 bg-transparent text-white font-mono text-sm outline-none placeholder-gray-600 caret-green-400'
           />
         </form>
       </div>
