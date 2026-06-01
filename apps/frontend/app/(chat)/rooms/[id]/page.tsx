@@ -146,10 +146,21 @@ export default function RoomPage() {
       <div className='flex flex-col flex-1 overflow-y-auto px-4 py-2 gap-1'>
         {messages?.map((message) => {
           return (
-            <div key={message.id} className='font-mono text-sm leading-relaxed'>
-              <span className='text-green-400'>{message.username}</span>
-              <span className='text-gray-500'>: </span>
-              <span className='text-gray-200'>{message.content}</span>
+            <div
+              key={message.id}
+              className='font-mono text-sm leading-relaxed flex justify-between'
+            >
+              <div>
+                <span className='text-green-400'>{message.username}</span>
+                <span className='text-gray-500'>: </span>
+                <span className='text-gray-200'>{message.content}</span>
+              </div>
+              <div>
+                {new Date(message.createdAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
             </div>
           );
         })}
