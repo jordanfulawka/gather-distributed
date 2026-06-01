@@ -22,7 +22,7 @@ export default function RoomPage() {
   const messageRef = useRef<Message[] | null>(null);
   const isMountedRef = useRef(false);
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { id } = useParams();
   const roomId = id as string;
 
@@ -53,6 +53,9 @@ export default function RoomPage() {
     setIsTyping(false);
   }
 
+  function play() {
+    new Audio('/notification.mp3').play();
+  }
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: 'smooth' });
     messageRef.current = messages;
@@ -75,6 +78,9 @@ export default function RoomPage() {
       }
     });
     socket.on('message:received', (message) => {
+      if (message.userId !== user?.id) {
+        play();
+      }
       setMessages((prev) => (prev ? [...prev, message] : [message]));
     });
     socket.on('presence:update', (presence: Record<string, string>) => {
@@ -157,8 +163,13 @@ export default function RoomPage() {
             .join(', ')}
           {Object.values(typingUsers).some(Boolean) && ' is typing...'}
         </div>
-        <form onSubmit={handleSubmit} className='flex items-center gap-2 px-4 py-3'>
-          <span className='text-green-400 font-mono text-sm select-none'>{'>'}</span>
+        <form
+          onSubmit={handleSubmit}
+          className='flex items-center gap-2 px-4 py-3'
+        >
+          <span className='text-green-400 font-mono text-sm select-none'>
+            {'>'}
+          </span>
           <input
             type='text'
             value={text}
