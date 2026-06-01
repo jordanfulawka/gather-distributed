@@ -43,6 +43,7 @@ export default function RoomPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (text === '') return;
     const uuid = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
     socket.emit('messages:send', {
       roomId: roomId,
