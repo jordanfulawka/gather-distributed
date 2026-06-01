@@ -84,7 +84,7 @@ function registerHandlers(io: Server, redis: Redis) {
     socket.on('presence:ping', async (roomId) => {
       await redis.hset(
         `presence:${roomId}`,
-        socket.data.user.id,
+        socket.data.user.username,
         process.env.SERVER_ID as string,
       );
       await redis.expire(`presence:${roomId}`, 60);

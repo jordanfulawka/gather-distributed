@@ -62,7 +62,7 @@ async function findRoomByInviteCode(inviteCode: string): Promise<Room> {
 
 async function getMessagesByRoomId(roomId: string): Promise<Message[]> {
   const text =
-    'SELECT messages.id, messages.room_id AS "roomId", messages.user_id AS "userId", users.username, messages.content, messages.created_at AS "createdAt" FROM messages JOIN users ON messages.user_id = users.id WHERE room_id = $1';
+    'SELECT messages.id, messages.room_id AS "roomId", messages.user_id AS "userId", users.username, messages.content, messages.created_at AS "createdAt" FROM messages JOIN users ON messages.user_id = users.id WHERE room_id = $1 ORDER BY messages.created_at ASC';
   const values = [roomId];
 
   const result = await pool.query(text, values);

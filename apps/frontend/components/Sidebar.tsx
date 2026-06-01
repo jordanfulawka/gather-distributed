@@ -40,7 +40,7 @@ export default function Sidebar() {
   return (
     <div className='h-full bg-black/90 w-64 flex flex-col justify-between'>
       <div className='flex flex-col'>
-        <h1 className='text-white text-2xl p-5 text-center'>gatherrr</h1>
+        <h1 className='text-white text-2xl p-5 text-center'>gather</h1>
         <div className='flex flex-col'>
           {rooms?.map((room) => (
             <Link key={room.id} href={`/rooms/${room.id}`}>
