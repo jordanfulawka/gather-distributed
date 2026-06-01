@@ -17,8 +17,8 @@ const { Redis } = require('ioredis');
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use('/auth', authRouter);
-app.use('/rooms', roomsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/rooms', roomsRouter);
 
 const httpServer = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {

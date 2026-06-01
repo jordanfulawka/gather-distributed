@@ -1,6 +1,11 @@
 import { io } from 'socket.io-client';
 
-const socket = io(`${process.env.NEXT_PUBLIC_API_URL}`, {
+const API_URL =
+  typeof window !== 'undefined'
+    ? `http://${window.location.hostname}`
+    : 'http://localhost';
+
+const socket = io(`${API_URL}`, {
   autoConnect: false,
 });
 
