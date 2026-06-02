@@ -190,7 +190,7 @@ export default function RoomPage() {
               setText(e.target.value);
             }}
             placeholder='type a message...'
-            className='flex-1 bg-transparent text-white font-mono text-sm outline-none placeholder-gray-600 caret-green-400'
+            className='flex-1 bg-transparent text-white font-mono text-sm outline-none placeholder-gray-600 caret-green-400 '
           />
         </form>
       </div>

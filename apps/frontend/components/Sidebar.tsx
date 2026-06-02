@@ -3,11 +3,12 @@
 import { useAuth } from '@/context/AuthContext';
 import { getRooms } from '@/lib/api';
 import { Room } from '@gather/shared-types';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import CreateRoomModal from './CreateRoomModal';
 import JoinRoomModal from './JoinRoomModal';
 import Link from 'next/link';
+import path from 'path';
 
 export default function Sidebar() {
   const { token, logout } = useAuth();
@@ -17,6 +18,7 @@ export default function Sidebar() {
   const [showJoinModal, setShowJoinModal] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   async function fetchRooms() {
     try {
@@ -40,15 +42,21 @@ export default function Sidebar() {
   return (
     <div className='h-full bg-black/90 w-64 flex flex-col justify-between'>
       <div className='flex flex-col'>
-        <h1 className='text-white text-2xl p-5 text-center'>gather</h1>
+        <h1
+          className='text-white text-2xl p-5 text-center cursor-pointer'
+          onClick={() => router.push('/rooms')}
+        >
+          gather
+        </h1>
         <div className='flex flex-col'>
           {rooms?.map((room) => (
             <Link key={room.id} href={`/rooms/${room.id}`}>
               <div
-                className='text-gray-300 hover:bg-white/10 hover:text-white px-4 py-2 rounded-md mx-2 transition-colors
-              cursor-pointer'
+                className={`text-gray-300 hover:bg-white/10 hover:text-white px-4 py-2 rounded-md mx-2 transition-colors
+              cursor-pointer `}
               >
-                # {room.name}
+                {pathname === `/rooms/${room.id}` ? '> # ' : '# '}
+                {room.name}
               </div>
             </Link>
           ))}
@@ -74,19 +82,20 @@ export default function Sidebar() {
       )}
       <div className='p-5 flex flex-col justify-center gap-5'>
         <button
-          className='bg-green-500 rounded-lg w-full'
+          // className='bg-green-500 rounded-lg w-full'
+          className='border border-white text-white hover:bg-white hover:text-black transition-colors rounded-lg w-full p-1'
           onClick={() => setShowCreateModal(true)}
         >
           <p className='p-1'>create room</p>
         </button>
         <button
-          className='bg-fuchsia-500 rounded-lg w-full'
+          className='border border-white text-white hover:bg-white hover:text-black transition-colors rounded-lg w-full p-1'
           onClick={() => setShowJoinModal(true)}
         >
           <p className='p-1'>join room</p>
         </button>
         <button
-          className='bg-gray-700 rounded-lg w-full'
+          className='border border-red-400 text-red-400 hover:bg-red-400 hover:text-black transition-colors rounded-lg w-full p-1'
           onClick={() => {
             logout();
             router.push('/');

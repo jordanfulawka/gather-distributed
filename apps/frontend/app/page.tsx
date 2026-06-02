@@ -52,62 +52,78 @@ export default function Home() {
   }
 
   return (
-    <div className='bg-black/80 fixed inset-0 flex justify-center items-center z-50'>
-      <div className='bg-white w-96 rounded-2xl'>
+    <div className='bg-black fixed inset-0 flex justify-evenly items-center z-50'>
+      <div className='text-white text-9xl'>
+        gather.<span className='animate-blink'>_</span>
+      </div>
+      <div className='w-96 rounded-2xl'>
         <div className='p-4'>
-          <form onSubmit={handleSubmit} className='flex flex-col'>
-            <label>Email</label>
-            <input
-              type='text'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className='border border-black'
-            />
-            {mode === 'register' && (
-              <>
-                <label>Username</label>
+          <form
+            onSubmit={handleSubmit}
+            className='flex flex-col text-white h-64'
+          >
+            <div className='flex flex-col'>
+              <label>{'> '}email</label>
+              <input
+                type='text'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className='border border-white w-full py-2 px-3'
+              />
+            </div>
+            <div
+              className={`overflow-clip transition-all duration-300 ${mode == 'register' ? 'max-h-24' : 'max-h-0'}`}
+            >
+              <div className='flex flex-col overflow-visible'>
+                <label>{'> '}username</label>
                 <input
                   type='text'
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className='border border-black'
+                  className='border border-white w-full py-2 px-3 outline-none focus:border-white'
+                  tabIndex={mode === 'register' ? 0 : -1}
                 />
-              </>
-            )}
-            <label>Password</label>
-            <input
-              type='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className='border border-black'
-            />
-            <button type='submit'>
-              {mode === 'login' ? 'Login' : 'Register'}
+              </div>
+            </div>
+
+            <div className='flex flex-col'>
+              <label>{'> '}password</label>
+              <input
+                type='password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className='border border-white w-full py-2 px-3'
+              />
+            </div>
+            <div className='text-white'>
+              {mode === 'login' && (
+                <p
+                  onClick={() => {
+                    setMode('register');
+                    clearFields();
+                  }}
+                  className='text-sm cursor-pointer'
+                >
+                  $ no account? register
+                </p>
+              )}
+              {mode === 'register' && (
+                <p
+                  onClick={() => {
+                    setMode('login');
+                    clearFields();
+                  }}
+                  className='text-sm cursor-pointer'
+                >
+                  $ already signed up? login
+                </p>
+              )}
+              {error && <p>{error}</p>}
+            </div>
+            <button type='submit' className='mt-auto'>
+              {mode === 'login' ? 'login' : 'register'}
             </button>
           </form>
-          <div>
-            {mode === 'login' && (
-              <p
-                onClick={() => {
-                  setMode('register');
-                  clearFields();
-                }}
-              >
-                Don't have an account? Click here to Register
-              </p>
-            )}
-            {mode === 'register' && (
-              <p
-                onClick={() => {
-                  setMode('login');
-                  clearFields();
-                }}
-              >
-                Already have an account? Click here to Login
-              </p>
-            )}
-            {error && <p>{error}</p>}
-          </div>
         </div>
       </div>
     </div>
