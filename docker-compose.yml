@@ -48,7 +48,7 @@ services:
       context: .
       dockerfile: apps/frontend/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:80
+        NEXT_PUBLIC_API_URL: https://gather-chat.dev
     ports:
       - '3000:3000'
     depends_on:
