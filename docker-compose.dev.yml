@@ -14,7 +14,7 @@ services:
   server-a:
     image: node:20-alpine
     working_dir: /app
-    command: sh -c "npm install && cd apps/chat-server && npm run dev"
+    command: sh -c "npm install && cd apps/chat-server && npx ts-node-dev --respawn --transpile-only --poll src/index.ts"
     volumes:
       - .:/app
       - server_a_node_modules:/app/node_modules
@@ -33,7 +33,7 @@ services:
   server-b:
     image: node:20-alpine
     working_dir: /app
-    command: sh -c "npm install && cd apps/chat-server && npm run dev"
+    command: sh -c "npm install && cd apps/chat-server && npx ts-node-dev --respawn --transpile-only --poll src/index.ts"
     volumes:
       - .:/app
       - server_b_node_modules:/app/node_modules
@@ -52,7 +52,7 @@ services:
   frontend:
     image: node:20-alpine
     working_dir: /app
-    command: sh -c "npm install && cd apps/frontend && npm run dev"
+    command: sh -c "npm install && cd apps/frontend && npx next dev --webpack"
     volumes:
       - .:/app
       - frontend_node_modules:/app/node_modules
@@ -60,6 +60,7 @@ services:
       - '3000:3000'
     environment:
       NEXT_PUBLIC_API_URL: http://localhost
+      WATCHPACK_POLLING: 'true'
 
   redis:
     image: redis:7-alpine

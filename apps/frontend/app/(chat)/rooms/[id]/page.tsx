@@ -6,10 +6,12 @@ import { socket } from '@/lib/socket';
 import { Message, Room } from '@gather/shared-types';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+type SystemMessage = { type: 'system'; id: string; content: string };
+type ChatItem = Message | SystemMessage;
 
 export default function RoomPage() {
   const [error, setError] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[] | null>(null);
+  const [messages, setMessages] = useState<ChatItem[] | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [text, setText] = useState('');
   const [onlineUsers, setOnlineUsers] = useState<Record<string, string>>({});
@@ -19,7 +21,7 @@ export default function RoomPage() {
   const ref = useRef<HTMLDivElement>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const hasConnectedRef = useRef(false);
-  const messageRef = useRef<Message[] | null>(null);
+  const messageRef = useRef<ChatItem[] | null>(null);
   const isMountedRef = useRef(false);
 
   const { token, user } = useAuth();
@@ -68,7 +70,8 @@ export default function RoomPage() {
     socket.connect();
     socket.on('connect', () => {
       if (hasConnectedRef.current) {
-        const lastMessageId = messageRef.current?.at(-1)?.id ?? null;
+        const lastMessageId =
+          messageRef.current?.filter((m) => !('type' in m)).at(-1)?.id ?? null;
         socket.emit('room:rejoin', { roomId, lastMessageId });
       } else {
         hasConnectedRef.current = true;
@@ -90,6 +93,26 @@ export default function RoomPage() {
     socket.on('typing:update', (user) => {
       setTypingUsers((prev) => ({ ...prev, [user.username]: user.isTyping }));
     });
+    socket.on('room:user_joined', (joinedUser) => {
+      if (joinedUser.id === user?.id) {
+        return;
+      }
+      const item: SystemMessage = {
+        type: 'system',
+        id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2),
+        content: `${joinedUser.username} has joined the room!`,
+      };
+      setMessages((prev) => (prev ? [...prev, item] : [item]));
+    });
+
+    // socket.on('room:user_left', (leftUser) => {
+    //   const item: SystemMessage = {
+    //     type: 'system',
+    //     id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2),
+    //     content: `${leftUser.username} has left the room!`,
+    //   };
+    //   setMessages((prev) => (prev ? [...prev, item] : [item]));
+    // });
 
     fetchMessagesAndRoomData();
 
@@ -99,6 +122,8 @@ export default function RoomPage() {
       socket.off('message:received');
       socket.off('presence:update');
       socket.off('typing:update');
+      socket.off('room:user_joined');
+      // socket.off('room:user_left');
       socket.disconnect();
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
     };
@@ -145,19 +170,29 @@ export default function RoomPage() {
         </div>
       </div>
       <div className='flex flex-col flex-1 overflow-y-auto px-4 py-2 gap-1'>
-        {messages?.map((message) => {
+        {messages?.map((item) => {
+          if ('type' in item) {
+            return (
+              <div
+                key={item.id}
+                className='font-mono text-sm text-gray-500 italic py-1'
+              >
+                {item.content}
+              </div>
+            );
+          }
           return (
             <div
-              key={message.id}
+              key={item.id}
               className='font-mono text-sm leading-relaxed flex justify-between'
             >
               <div>
-                <span className='text-green-400'>{message.username}</span>
+                <span className='text-green-400'>{item.username}</span>
                 <span className='text-gray-500'>: </span>
-                <span className='text-gray-200'>{message.content}</span>
+                <span className='text-gray-200'>{item.content}</span>
               </div>
               <div>
-                {new Date(message.createdAt).toLocaleTimeString([], {
+                {new Date(item.createdAt).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}

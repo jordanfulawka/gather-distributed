@@ -75,7 +75,7 @@ function registerHandlers(io: Server, redis: Redis) {
     });
     socket.on('disconnecting', async () => {
       for (const roomId of socket.rooms) {
-        socket.to(roomId).emit('room:user_left', socket.data.user.id);
+        socket.to(roomId).emit('room:user_left', socket.data.user);
         await redis.hdel(`presence:${roomId}`, socket.data.user.username);
         const presence = await redis.hgetall(`presence:${roomId}`);
         io.to(roomId).emit('presence:update', presence);
