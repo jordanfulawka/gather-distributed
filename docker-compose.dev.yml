@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gather
+      POSTGRES_PASSWORD: gather
+      POSTGRES_DB: gather
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./infrastructure/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+
+  server-a:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && cd apps/chat-server && npm run dev"
+    volumes:
+      - .:/app
+      - server_a_node_modules:/app/node_modules
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgres://gather:gather@postgres:5432/gather
+      REDIS_URL: redis://:gather@redis:6379
+      JWT_SECRET: dev-secret-change-me
+      PORT: 3001
+      SERVER_ID: 'server-a'
+    depends_on:
+      - postgres
+      - redis
+
+  server-b:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && cd apps/chat-server && npm run dev"
+    volumes:
+      - .:/app
+      - server_b_node_modules:/app/node_modules
+    ports:
+      - '3002:3001'
+    environment:
+      DATABASE_URL: postgres://gather:gather@postgres:5432/gather
+      REDIS_URL: redis://:gather@redis:6379
+      JWT_SECRET: dev-secret-change-me
+      PORT: 3001
+      SERVER_ID: 'server-b'
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && cd apps/frontend && npm run dev"
+    volumes:
+      - .:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    command: redis-server --requirepass gather --appendonly yes
+    volumes:
+      - redis-data:/data
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./infrastructure/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - '80:80'
+    depends_on:
+      - server-a
+      - server-b
+
+volumes:
+  postgres_data:
+  redis-data:
+  server_a_node_modules:
+  server_b_node_modules:
+  frontend_node_modules:
+
+# dev command: docker compose -f docker-compose.dev.yml up -d --build
