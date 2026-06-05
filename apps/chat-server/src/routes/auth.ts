@@ -25,7 +25,15 @@ router.route('/register').post(async (req: Request, res: Response) => {
     );
 
     res.status(201).json({ token });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === '23505') {
+      if (err.detail?.includes('email')) {
+        return res.status(409).json({ error: 'Email is already in use' });
+      }
+      if (err.detail?.includes('username')) {
+        return res.status(409).json({ error: 'Username is already in use' });
+      }
+    }
     console.error(err);
     res.status(500).json({ error: 'Registration Failed' });
   }
@@ -49,7 +57,7 @@ router.route('/login').post(async (req: Request, res: Response) => {
       );
       res.status(200).json({ token });
     } else {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Invalid Credentials' });
     }
   } catch (err) {
     res.status(500).json({ error: 'Login failed' });

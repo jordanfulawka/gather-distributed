@@ -33,7 +33,7 @@ export default function Home() {
         login(token);
         router.push('/rooms');
       } catch (err) {
-        setError('There was an error logging you in');
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }
@@ -43,8 +43,9 @@ export default function Home() {
         const { token } = await apiRegister(email, username, password);
         login(token);
         router.push('/rooms');
-      } catch (err) {
-        setError('There was an error registering you account');
+      } catch (err: any) {
+        console.log(err.message);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -118,7 +119,7 @@ export default function Home() {
                   $ already signed up? login
                 </p>
               )}
-              {error && <p>{error}</p>}
+              {error && <p className='text-red-600 pt-5'>{error}</p>}
             </div>
             <button type='submit' className='mt-auto'>
               {mode === 'login' ? 'login' : 'register'}
