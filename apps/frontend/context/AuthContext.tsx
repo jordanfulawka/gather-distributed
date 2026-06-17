@@ -1,6 +1,5 @@
 'use client';
 import type { User } from '@gather/shared-types';
-import { decode } from 'punycode';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
