@@ -12,6 +12,6 @@ jobs:
           key: ${{secrets.VPS_SSH_KEY}}
           script: |
             cd ~/gather-distributed
-            docker-compose down
-            git pull
-            docker-compose up --build -d
+            docker compose down --remove-orphans
+            git pull --ff-only
+            docker compose up --build -d
