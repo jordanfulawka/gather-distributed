@@ -18,7 +18,7 @@ Real-time chat applications are fairly simple to build for a single server once 
 - Live Join Notifications - System messages broadcast in-room when a user joins, synced across whichever server instance other members are connected to
 - Dockerized Multi-Service Architecture - One docker-compose command spins up the frontend, two chat server nodes, Redis, PostgreSQL, and nginx together, with a hot-reload dev variant for active development
 
-## Build With
+## Built With
 
 ### Frontend (client)
 
@@ -67,7 +67,7 @@ Real-time chat applications are fairly simple to build for a single server once 
    `docker compose -f docker-compose.dev.yml down`  
    _Optionally add a -v flag to the above command to clear the database_
 
-_All required environment variables (DB credentials, JWT secret, Redis URL, etc.) are already set in the docker-compose.dev.yuml file for local development, no .env file is needed to get running._
+_All required environment variables (DB credentials, JWT secret, Redis URL, etc.) are already set in the docker-compose.dev.yml file for local development, no .env file is needed to get running._
 
 ## Roadmap
 
