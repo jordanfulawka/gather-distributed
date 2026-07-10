@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="80" fill="#0a0a0a"/>
+
+  <!-- bigger, bolder terminal prompt chevron, filling most of the frame -->
+  <path d="M 76 108 L 236 256 L 76 404"
+        stroke="#f5f5f5" stroke-width="64" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+
+  <!-- blinking cursor block -->
+  <rect x="292" y="356" width="144" height="64" fill="#f5f5f5"/>
+</svg>
